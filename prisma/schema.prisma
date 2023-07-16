@@ -75,13 +75,12 @@ model Events {
 }
 
 model ConfirmedUsers {
-  id      String @id @default(cuid())
-  userId  String @unique
+  userId  String
   event   Events @relation(fields: [eventId], references: [id])
   eventId String
   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([eventId])
+  @@id([eventId, userId])
 }
 
 model TopUserSongs {
