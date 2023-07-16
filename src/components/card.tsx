@@ -14,7 +14,7 @@ const Card: React.FC<props> = ({
   buttonText,
 }) => {
   return (
-    <div className="card w-80 bg-accent-content shadow-xl">
+    <div className="card h-80 w-80 bg-accent-content shadow-xl">
       <div className="card-body">
         <h2 className="card-title">{title}</h2>
         {children}

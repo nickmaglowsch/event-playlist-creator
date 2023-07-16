@@ -2,6 +2,15 @@ import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
 import LoggedPage from "@/layout/logged-page";
 import Card from "@/components/card";
+import {
+  BiSolidSkipNextCircle,
+  BiSolidSkipPreviousCircle,
+} from "react-icons/bi";
+import SimplePaginate from "@/components/simple-paginate";
+import { api } from "@/utils/api";
+import { useRef, useState } from "react";
+import { useRouter } from "next/router";
+import CreateEvent from "@/components/create-event";
 
 export default function Home() {
   const { status } = useSession();
@@ -49,63 +58,40 @@ export default function Home() {
 }
 
 function LoggedHome() {
+  const [offset, setOffset] = useState(0);
+  const limit = 16;
+  const generalEvents = api.event.getAll.useQuery({
+    offset: offset,
+    limit: limit,
+  });
+
+  if (!generalEvents || !generalEvents.data) {
+    return null;
+  }
+
   return (
     <>
       <LoggedPage>
-        <div className="flex justify-center">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <h1 className="mb-5 text-center text-2xl text-gray-300">Em Alta</h1>
+        <SimplePaginate
+          isLastPage={() => generalEvents.data.length < 16}
+          isFirstPage={() => offset === 0}
+          backButtonClick={() =>
+            setOffset((prevState) => prevState - generalEvents.data.length)
+          }
+          forwardButtonClick={() => setOffset((prevState) => prevState + 16)}
+        >
+          {generalEvents.data.map(({ name, eventDate, id }) => (
             <Card
-              buttonClick={() => console.log("teste")}
-              buttonText={"teste"}
-              title={"teste"}
-            />
-            <Card
-              buttonClick={() => console.log("teste")}
-              buttonText={"teste"}
-              title={"teste"}
-            />
-            <Card
-              buttonClick={() => console.log("teste")}
-              buttonText={"teste"}
-              title={"teste"}
-            />
-            <Card
-              buttonClick={() => console.log("teste")}
-              buttonText={"teste"}
-              title={"teste"}
-            />
-            <Card
-              buttonClick={() => console.log("teste")}
-              buttonText={"teste"}
-              title={"teste"}
-            />
-            <Card
-              buttonClick={() => console.log("teste")}
-              buttonText={"teste"}
-              title={"teste"}
-            />
-            <Card
-              buttonClick={() => console.log("teste")}
-              buttonText={"teste"}
-              title={"teste"}
-            />
-            <Card
-              buttonClick={() => console.log("teste")}
-              buttonText={"teste"}
-              title={"teste"}
-            />
-            <Card
-              buttonClick={() => console.log("teste")}
-              buttonText={"teste"}
-              title={"teste"}
-            />
-            <Card
-              buttonClick={() => console.log("teste")}
-              buttonText={"teste"}
-              title={"teste"}
-            />
-          </div>
-        </div>
+              key={id}
+              title={name}
+              buttonClick={() => console.log("TODO")}
+              buttonText="Ver mais"
+            >
+              <p>{eventDate.toLocaleString()}</p>
+            </Card>
+          ))}
+        </SimplePaginate>
       </LoggedPage>
     </>
   );

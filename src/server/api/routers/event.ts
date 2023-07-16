@@ -6,26 +6,34 @@ import {
 } from "@/server/api/trpc";
 
 export const eventRouter = createTRPCRouter({
-  getAll: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.events.findMany({
-      where: {
-        eventDate: {
-          gt: new Date(),
-        },
-      },
-      take: 100,
-      orderBy: [
-        {
-          ConfirmedUsers: {
-            _count: "desc",
+  getAll: publicProcedure
+    .input(
+      z.object({
+        offset: z.number().gte(0),
+        limit: z.number().gt(0),
+      })
+    )
+    .query(({ ctx, input }) => {
+      return ctx.prisma.events.findMany({
+        where: {
+          eventDate: {
+            gt: new Date(),
           },
         },
-        {
-          eventDate: "desc",
-        },
-      ],
-    });
-  }),
+        skip: input.offset,
+        take: input.limit,
+        orderBy: [
+          {
+            ConfirmedUsers: {
+              _count: "desc",
+            },
+          },
+          {
+            eventDate: "desc",
+          },
+        ],
+      });
+    }),
 
   createEventPlayList: protectedProcedure
     .input(
@@ -43,25 +51,48 @@ export const eventRouter = createTRPCRouter({
       return;
     }),
 
-  getMyEvents: protectedProcedure.query(({ ctx }) => {
-    return ctx.prisma.events.findMany({
-      where: {
-        userId: ctx.session.user.id,
-      },
-    });
-  }),
+  getMyEvents: protectedProcedure
+    .input(
+      z.object({
+        offset: z.number().gte(0),
+        limit: z.number().gt(0),
+      })
+    )
+    .query(({ ctx, input }) => {
+      return ctx.prisma.events.findMany({
+        where: {
+          userId: ctx.session.user.id,
+        },
+        skip: input.offset,
+        take: input.limit,
+        orderBy: [
+          {
+            eventDate: "desc",
+          },
+        ],
+      });
+    }),
 
-  getEventsIamGoing: protectedProcedure.query(({ ctx }) => {
-    return ctx.prisma.events.findMany({
-      where: {
-        ConfirmedUsers: {
-          some: {
-            userId: ctx.session.user.id,
+  getEventsIamGoing: protectedProcedure
+    .input(
+      z.object({
+        offset: z.number().gte(0),
+        limit: z.number().gt(0),
+      })
+    )
+    .query(({ ctx, input }) => {
+      return ctx.prisma.events.findMany({
+        where: {
+          ConfirmedUsers: {
+            some: {
+              userId: ctx.session.user.id,
+            },
           },
         },
-      },
-    });
-  }),
+        skip: input.offset,
+        take: input.limit,
+      });
+    }),
 
   createMyEvent: protectedProcedure
     .input(
